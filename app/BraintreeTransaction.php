@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BraintreeUserDetails extends Model
+class BraintreeTransaction extends Model
 {
     /**
      * A braintree row belongs to a user.

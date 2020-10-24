@@ -4,7 +4,7 @@ namespace App\Http\Resources\Braintree;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class BraintreeUserDetailsResource extends JsonResource
+class BraintreeTransactionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,6 +16,7 @@ class BraintreeUserDetailsResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'               => $this->id,
             'transaction_id'   => $this->transaction_id,
             'card_type'        => $this->card_type,
             'last4'            => $this->last4,

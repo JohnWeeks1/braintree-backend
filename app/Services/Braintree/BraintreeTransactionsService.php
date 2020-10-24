@@ -2,10 +2,10 @@
 
 namespace App\Services\Braintree;
 
+use App\BraintreeTransaction;
 use Illuminate\Http\Request;
-use App\BraintreeUserDetails;
 
-class BraintreeUserDetailsService
+class BraintreeTransactionsService
 {
     /**
      * Braintree Gateway.
@@ -23,7 +23,7 @@ class BraintreeUserDetailsService
     }
 
     /**
-     * Braintree Transaction Gateway.
+     * Braintree BraintreeTransaction Gateway.
      *
      * @param Request $request
      *
@@ -45,21 +45,21 @@ class BraintreeUserDetailsService
      *
      * @param Object $transaction
      *
-     * @return BraintreeUserDetails
+     * @return BraintreeTransaction
      */
-    public function storeBraintreeUserDetails(Object $transaction): BraintreeUserDetails
+    public function storeBraintreeUserDetails(Object $transaction): BraintreeTransaction
     {
-        $braintree = new BraintreeUserDetails;
+        $newTransaction = new BraintreeTransaction;
 
-        $braintree->user_id          = auth()->user()->id;
-        $braintree->transaction_id   = $transaction->id;
-        $braintree->card_type        = $transaction->creditCardDetails->cardType;
-        $braintree->last4            = $transaction->creditCardDetails->last4;
-        $braintree->expiration_month = $transaction->creditCardDetails->expirationMonth;
-        $braintree->expiration_year  = $transaction->creditCardDetails->expirationYear;
+        $newTransaction->transaction_id   = $transaction->id;
+        $newTransaction->user_id          = auth()->user()->id;
+        $newTransaction->card_type        = $transaction->creditCardDetails->cardType;
+        $newTransaction->last4            = $transaction->creditCardDetails->last4;
+        $newTransaction->expiration_month = $transaction->creditCardDetails->expirationMonth;
+        $newTransaction->expiration_year  = $transaction->creditCardDetails->expirationYear;
 
-        $braintree->save();
+        $newTransaction->save();
 
-        return $braintree;
+        return $newTransaction;
     }
 }

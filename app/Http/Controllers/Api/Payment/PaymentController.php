@@ -3,45 +3,45 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
+use App\Services\Braintree\BraintreeTransactionsService;
 use App\Http\Requests\Payments\StorePaymentRequest;
-use App\Services\Braintree\BraintreeUserDetailsService;
-use App\Http\Resources\Braintree\BraintreeUserDetailsResource;
+use App\Http\Resources\Braintree\BraintreeTransactionResource;
 
 class PaymentController extends Controller
 {
     /**
-     * Braintree User Details Service.
+     * Transactions Service.
      *
-     * @var BraintreeUserDetailsService
+     * @var BraintreeTransactionsService
      */
-    protected $braintreeUserDetailsService;
+    protected $transactionsService;
 
     /**
      * PaymentController constructor.
      *
-     * @param BraintreeUserDetailsService $braintreeUserDetailsService
+     * @param BraintreeTransactionsService $transactionsService
      *
      * @return void
      */
-    public function __construct(BraintreeUserDetailsService $braintreeUserDetailsService)
+    public function __construct(BraintreeTransactionsService $transactionsService)
     {
-        $this->braintreeUserDetailsService = $braintreeUserDetailsService;
+        $this->transactionsService = $transactionsService;
     }
 
     /**
-     * BraintreeUserDetails store method to setup a Braintree payment.
+     * BraintreeTransactionsService store method to setup a Braintree payment.
      *
      * @param StorePaymentRequest $request
      *
-     * @return BraintreeUserDetailsResource
+     * @return BraintreeTransactionResource
      */
-    public function store(StorePaymentRequest $request): BraintreeUserDetailsResource
+    public function store(StorePaymentRequest $request): BraintreeTransactionResource
     {
-        $gatewayResult = $this->braintreeUserDetailsService->gatewayTransaction($request);
+        $gatewayResult = $this->transactionsService->gatewayTransaction($request);
 
-        $userTransactionDetails = $this->braintreeUserDetailsService
+        $transactionDetails = $this->transactionsService
             ->storeBraintreeUserDetails($gatewayResult->transaction);
 
-        return new BraintreeUserDetailsResource($userTransactionDetails);
+        return new BraintreeTransactionResource($transactionDetails);
     }
 }
