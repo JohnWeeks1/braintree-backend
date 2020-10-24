@@ -2,32 +2,46 @@
 
 namespace App\Http\Controllers\Api\Payment;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Responses\SuccessResponse;
+use App\Http\Requests\Payments\StorePaymentRequest;
+use App\Services\Braintree\BraintreeUserDetailsService;
+use App\Http\Resources\Braintree\BraintreeUserDetailsResource;
 
 class PaymentController extends Controller
 {
     /**
-     * Payment store method to setup a Braintree payment.
+     * Braintree User Details Service.
      *
-     * @param Request $request
-     *
-     * @return SuccessResponse
+     * @var BraintreeUserDetailsService
      */
-    public function store(Request $request): SuccessResponse
-    {
-//        $user = $request->user();
-//        $paymentMethod = $request->payment_method;
-//        $plan = Plan::findOrFail(env('DEFAULT_PLAN_ID'));
-//
-//        $user->newSubscription(
-//            'default',
-//            $plan->stripe_id
-//        )->create($paymentMethod);
-//
-//        $user->save();
+    protected $braintreeUserDetailsService;
 
-        return new SuccessResponse('Sick');
+    /**
+     * PaymentController constructor.
+     *
+     * @param BraintreeUserDetailsService $braintreeUserDetailsService
+     *
+     * @return void
+     */
+    public function __construct(BraintreeUserDetailsService $braintreeUserDetailsService)
+    {
+        $this->braintreeUserDetailsService = $braintreeUserDetailsService;
+    }
+
+    /**
+     * BraintreeUserDetails store method to setup a Braintree payment.
+     *
+     * @param StorePaymentRequest $request
+     *
+     * @return BraintreeUserDetailsResource
+     */
+    public function store(StorePaymentRequest $request): BraintreeUserDetailsResource
+    {
+        $gatewayResult = $this->braintreeUserDetailsService->gatewayTransaction($request);
+
+        $userTransactionDetails = $this->braintreeUserDetailsService
+            ->storeBraintreeUserDetails($gatewayResult->transaction);
+
+        return new BraintreeUserDetailsResource($userTransactionDetails);
     }
 }

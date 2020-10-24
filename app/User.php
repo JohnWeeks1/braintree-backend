@@ -35,4 +35,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * A user has many braintree user details.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function braintreeUserDetails()
+    {
+        return $this->hasMany(BraintreeUserDetails::class);
+    }
 }
