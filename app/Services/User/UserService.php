@@ -19,8 +19,8 @@ class UserService
     {
         $user = new User;
 
-        $user->firstname = $request->get('firstname');
-        $user->lastname = $request->get('lastname');
+        $user->first_name = $request->get('first_name');
+        $user->last_name = $request->get('last_name');
         $user->email = $request->get('email');
         $user->password = Hash::make($request->get('password'));
 

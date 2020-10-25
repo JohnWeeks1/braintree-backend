@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'firstname', 'lastname', 'email', 'password',
+        'first_name', 'last_name', 'email', 'password',
     ];
 
     /**
@@ -35,14 +35,4 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    /**
-     * A user has many braintree user details.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function braintreeUserDetails()
-    {
-        return $this->hasMany(BraintreeUserDetails::class);
-    }
 }

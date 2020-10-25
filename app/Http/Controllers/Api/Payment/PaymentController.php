@@ -3,45 +3,44 @@
 namespace App\Http\Controllers\Api\Payment;
 
 use App\Http\Controllers\Controller;
-use App\Services\Braintree\BraintreeTransactionsService;
+use App\Http\Responses\SuccessResponse;
+use App\Services\Braintree\BraintreeService;
 use App\Http\Requests\Payments\StorePaymentRequest;
-use App\Http\Resources\Braintree\BraintreeTransactionResource;
 
 class PaymentController extends Controller
 {
     /**
-     * Transactions Service.
+     * Braintree Service.
      *
-     * @var BraintreeTransactionsService
+     * @var BraintreeService
      */
-    protected $transactionsService;
+    protected $braintreeService;
 
     /**
      * PaymentController constructor.
      *
-     * @param BraintreeTransactionsService $transactionsService
+     * @param BraintreeService $braintreeService
      *
      * @return void
      */
-    public function __construct(BraintreeTransactionsService $transactionsService)
+    public function __construct(BraintreeService $braintreeService)
     {
-        $this->transactionsService = $transactionsService;
+        $this->braintreeService = $braintreeService;
     }
 
     /**
-     * BraintreeTransactionsService store method to setup a Braintree payment.
+     * Store method to setup a Braintree payment.
      *
      * @param StorePaymentRequest $request
      *
-     * @return BraintreeTransactionResource
+     * @return SuccessResponse
      */
-    public function store(StorePaymentRequest $request): BraintreeTransactionResource
+    public function store(StorePaymentRequest $request): SuccessResponse
     {
-        $gatewayResult = $this->transactionsService->gatewayTransaction($request);
+        $braintree_id   = $this->braintreeService->getUserBraintreeId($request);
+        $newTransaction = $this->braintreeService->oneOffPayment($request, $braintree_id);
+        $this->braintreeService->storeBraintreeUserDetails($newTransaction);
 
-        $transactionDetails = $this->transactionsService
-            ->storeBraintreeUserDetails($gatewayResult->transaction);
-
-        return new BraintreeTransactionResource($transactionDetails);
+        return new SuccessResponse('Payment Successful!');
     }
 }
