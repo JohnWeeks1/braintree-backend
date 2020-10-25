@@ -29,11 +29,13 @@ class PaymentController extends Controller
     }
 
     /**
-     * Store method to setup a Braintree payment.
+     * tore method to setup a Braintree payment.
      *
      * @param StorePaymentRequest $request
      *
      * @return SuccessResponse
+     *
+     * @throws \Braintree\Exception
      */
     public function store(StorePaymentRequest $request): SuccessResponse
     {

@@ -2,7 +2,7 @@
 
 namespace App\Services\Braintree;
 
-use App\User;
+use Braintree\Exception;
 use Illuminate\Http\Request;
 
 class BraintreeService
@@ -27,21 +27,24 @@ class BraintreeService
      *
      * @param Request $request
      *
-     * @return \Braintree\Result\Error|\Braintree\Result\Successful
+     * @return mixed|string|null
      */
     public function createCustomer(Request $request)
     {
-        $gateway = $this->gatewayInit();
+        try {
 
-        $newCustomer = $gateway->customer()->create([
-            'firstName'          => auth()->user()->first_name,
-            'lastName'           => auth()->user()->last_name,
-            'email'              => auth()->user()->email,
-            'paymentMethodNonce' => $request->get('nonce'),
-        ]);
+            $gateway = $this->gatewayInit();
 
-        if($newCustomer->success) {
-            return $newCustomer->customer;
+            return $gateway->customer()->create([
+                'firstName'          => auth()->user()->first_name,
+                'lastName'           => auth()->user()->last_name,
+                'email'              => auth()->user()->email,
+                'paymentMethodNonce' => $request->get('nonce'),
+            ]);
+
+        } catch (\Exception $e) {
+
+            return $e->getMessage();
         }
     }
 
@@ -51,20 +54,23 @@ class BraintreeService
      * @param Request $request
      * @param int $braintreeId
      *
-     * @return \Braintree\Result\Error|\Braintree\Result\Successful
+     * @return \Braintree\Result\Error|\Braintree\Result\Successful|string
      */
     public function oneOffPayment(Request $request, int $braintreeId)
     {
-        $gateway = $this->gatewayInit();
+        try {
 
-        $transaction = $gateway->transaction()->sale([
-            'customerId' => $braintreeId,
-            'amount'     => $request->get('amount'),
-            'options'    => [ 'submitForSettlement' => true ]
-        ]);
+            $gateway = $this->gatewayInit();
 
-        if ($transaction->success) {
-            return $transaction;
+            return $gateway->transaction()->sale([
+                'customerId' => $braintreeId,
+                'amount'     => $request->get('amount'),
+                'options'    => [ 'submitForSettlement' => true ]
+            ]);
+
+        } catch (\Exception $e) {
+
+            return $e->getMessage();
         }
     }
 
@@ -73,18 +79,25 @@ class BraintreeService
      *
      * @param Object $newTransaction
      *
-     * @return void
+     * @return string
      */
-    public function storeBraintreeUserDetails(Object $newTransaction): void
+    public function storeBraintreeUserDetails(Object $newTransaction)
     {
-        $user        = auth()->user();
-        $transaction = $newTransaction->transaction;
+        try {
 
-        $user->braintree_id   = $transaction->customer['id'];
-        $user->card_type      = $transaction->creditCardDetails->cardType;
-        $user->card_last_four = $transaction->creditCardDetails->last4;
+            $user        = auth()->user();
+            $transaction = $newTransaction->transaction;
 
-        $user->save();
+            $user->braintree_id   = $transaction->customer['id'];
+            $user->card_type      = $transaction->creditCardDetails->cardType;
+            $user->card_last_four = $transaction->creditCardDetails->last4;
+
+            $user->save();
+
+        } catch (\Exception $e) {
+
+            return $e->getMessage();
+        }
     }
 
     /**
@@ -92,19 +105,26 @@ class BraintreeService
      *
      * @param Request $request
      *
-     * @return string
+     * @return mixed
+     *
+     * @throws Exception
      */
-    public function getUserBraintreeId(Request $request): string
+    public function getUserBraintreeId(Request $request)
     {
         $user = auth()->user();
 
         if (is_null($user->braintree_id)) {
             $customer     = $this->createCustomer($request);
-            $braintree_id = $customer->id;
+            $braintree_id = $customer->customer->id;
         } else {
             $braintree_id = $user->braintree_id;
         }
 
-        return $braintree_id;
+        if (!is_null($braintree_id)) {
+
+            return $braintree_id;
+        }
+
+        throw new Exception('Something went wrong?');
     }
 }
