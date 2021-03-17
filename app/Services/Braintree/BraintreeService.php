@@ -65,7 +65,7 @@ class BraintreeService
             return $gateway->transaction()->sale([
                 'customerId' => $braintreeId,
                 'amount'     => $request->get('amount'),
-                'options'    => [ 'submitForSettlement' => true ]
+                // 'options'    => [ 'submitForSettlement' => true ]
             ]);
 
         } catch (\Exception $e) {
@@ -126,5 +126,25 @@ class BraintreeService
         }
 
         throw new Exception('Something went wrong?');
+    }
+
+    public function getUserFromBraintreeServerByBraintreeId(int $id)
+    {
+        $gateway = $this->gatewayInit();
+
+        $gateway->paymentMethod()->update(
+            'bvw3xtw',
+            [
+              'options' => [
+                'makeDefault' => true
+              ]
+            ]
+          );
+
+          sleep(2);
+
+          $customer = $gateway->customer()->find($id);
+
+        return $customer->defaultPaymentMethod();
     }
 }

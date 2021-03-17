@@ -23,6 +23,9 @@ Route::post('/register', [\App\Http\Controllers\Api\Auth\AuthController::class, 
 Route::post('/logout', [\App\Http\Controllers\Api\Auth\AuthController::class, 'logout'])
     ->name('api.auth.logout');
 
+Route::get('/payments/{id}', [\App\Http\Controllers\Api\Payment\PaymentController::class, 'show'])
+    ->name('api.payments.show');
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/users', [\App\Http\Controllers\Api\User\UserController::class, 'index'])
@@ -30,4 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/payments', [\App\Http\Controllers\Api\Payment\PaymentController::class, 'store'])
         ->name('api.payments.store');
+
+
 });

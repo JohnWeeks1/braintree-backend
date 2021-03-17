@@ -45,4 +45,11 @@ class PaymentController extends Controller
 
         return new SuccessResponse('Payment Successful!');
     }
+
+    public function show(int $id)
+    {
+        return response()->json([
+            $this->braintreeService->getUserFromBraintreeServerByBraintreeId($id)
+        ]);
+    }
 }
